@@ -1,26 +1,28 @@
 const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 function authenticationToken(req, res, next) {
-    console.log('jwwwtt');
+    // console.log('jwwwtt');
     const authHeader = req.header('authorization');
-    console.log(authHeader);
+    // console.log(authHeader);
     const token = authHeader && authHeader.split(' ')[1];
-    const token_string = JSON.parse(JSON.stringify(token));
+
     console.log(token, 'tokenssss');
-    if (token_string == null || token_string == undefined) return res.status(401).send('Unauthorized');
+    if (token == null || token == undefined) return res.status(401).send('Unauthorized');
     console.log(token, 'tokenenenene');
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-        console.log(user, 'jwt');
-        if (err?.message != null) { return res.status(403).send('Token Expired'); }
-        req.user = user
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+        console.log(data, 'jwt');
+        if (err?.message != null) return res.status(403).json(err);
+        // req.user = user
         next()
     })
 }
 
 
-function generateAccessToken(user) {
-    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '60s'});
-}
+const generateToken = (data, privateKey, expire) => jwt.sign(data, privateKey, { expiresIn: expire  }); 
 
 
-module.exports = {authenticationToken, generateAccessToken}
+
+module.exports = { authenticationToken, generateToken }
